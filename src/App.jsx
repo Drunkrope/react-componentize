@@ -1,161 +1,125 @@
 import React, { Component } from "react";
+import Footer from "./components/Footer.jsx";
+import SiteNav from "./components/SiteNav.jsx";
+import Home from "./components/Home.jsx";
+import Login from "./components/Login.jsx";
+import Blogs from "./components/Blogs.jsx";
+import Tech from "./components/Tech.jsx";
+import Friends from "./components/Friends.jsx";
+import FriendsForm from "./components/FriendsForm.jsx";
+import Jobs from "./components/Jobs.jsx";
+import Events from "./components/Events.jsx";
+import Register from "./components/Register";
+import * as userService from "./services/userService";
+
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import "./App.css";
 
 class App extends Component {
+  state = {
+    user: {
+      isLoggedIn: false,
+      userFirstName: "",
+      userLastName: "",
+    },
+  };
+
+  getCurrentUser = () => {
+    userService
+      .userCurrent()
+      .then(this.onCurrentSuccess)
+      .catch(this.onCurrentError);
+  };
+
+  onCurrentSuccess = (response) => {
+    const userId = response.data.item.id;
+    this.getById(userId);
+  };
+
+  onCurrentError = (response) => {
+    console.log(response.message);
+  };
+
+  getById = (userId) => {
+    userService.userId(userId).then(this.onIdSuccess).catch(this.onIdError);
+  };
+
+  onIdSuccess = (response) => {
+    this.setState(() => {
+      let user = { ...this.state.user };
+      const data = response.data.item;
+      user.userFirstName = data.firstName;
+      user.userLastName = data.lastName;
+      user.userId = data.id;
+      user.isLoggedIn = true;
+      return { user };
+    });
+  };
+  onIdError = (response) => {
+    console.log(response.message);
+  };
+
+  componentDidMount() {
+    this.getCurrentUser();
+  }
+
+  componentDidUpadte() {
+    if (!this.state.user.userFirstName && !this.state.user.userLastName) {
+      this.getCurrentUser();
+    }
+  }
+
+  updateUserLogin = (isLoggedIn) => {
+    this.setState((current) => {
+      return {
+        ...current,
+        user: {
+          ...current.user,
+          isLoggedIn,
+        },
+      };
+    });
+  };
+
   render() {
     return (
-      <React.Fragment>
-        <header className="p-3 bg-dark text-white">
-          <div className="container">
-            <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-              <a
-                href="/"
-                className="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none"
-              >
-                <img
-                  src="https://pw.sabio.la/images/Sabio.png"
-                  width="30"
-                  height="30"
-                  className="d-inline-block align-top"
-                  alt="Sabio"
-                />
-              </a>
-
-              <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li>
-                  <button
-                    href="#"
-                    className="nav-link px-2 text-secondary link-button"
-                  >
-                    Home
-                  </button>
-                </li>
-                <li>
-                  <button className="nav-link px-2 text-white link-button">
-                    Features
-                  </button>
-                </li>
-                <li>
-                  <button
-                    href="#"
-                    className="nav-link px-2 text-white link-button"
-                  >
-                    Pricing
-                  </button>
-                </li>
-                <li>
-                  <button
-                    href="#"
-                    className="nav-link px-2 text-white link-button"
-                  >
-                    FAQs
-                  </button>
-                </li>
-                <li>
-                  <button
-                    href="#"
-                    className="nav-link px-2 text-white link-button"
-                  >
-                    About
-                  </button>
-                </li>
-              </ul>
-
-              <form className="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
-                <input
-                  type="search"
-                  className="form-control form-control-dark"
-                  placeholder="Search..."
-                  aria-label="Search"
-                />
-              </form>
-
-              <div className="text-end">
-                <button type="button" className="btn btn-outline-light me-2">
-                  Login
-                </button>
-                <button type="button" className="btn btn-warning">
-                  Sign-up
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
+      <BrowserRouter>
+        <SiteNav
+          {...this.props}
+          updateUserLogin={this.updateUserLogin}
+          isUserLoggedIn={this.state.user.isLoggedIn}
+          firstName={this.state.user.userFirstName}
+        />
         <main role="main">
-          <div className="container">
-            <div className="p-5 mb-4 bg-light rounded-3">
-              <div className="container-fluid py-5">
-                <h1 className="display-5 fw-bold">Hello, world!</h1>
-                <p className="col-md-8 fs-4">
-                  This is a template for a simple marketing or informational
-                  website. It includes a large callout called a jumbotron and
-                  three supporting pieces of content. Use it as a starting point
-                  to create something more unique.
-                </p>
-                <p>
-                  <button className="btn btn-primary btn-lg">
-                    Learn more &raquo;
-                  </button>
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="container">
-            <div className="row">
-              <div className="col-md-4">
-                <h2>Heading</h2>
-                <p>
-                  Donec id elit non mi porta gravida at eget metus. Fusce
-                  dapibus, tellus ac cursus commodo, tortor mauris condimentum
-                  nibh, ut fermentum massa justo sit amet risus. Etiam porta sem
-                  malesuada magna mollis euismod. Donec sed odio dui.
-                </p>
-                <p>
-                  <button className="btn btn-secondary">
-                    View details &raquo;
-                  </button>
-                </p>
-              </div>
-              <div className="col-md-4">
-                <h2>Heading</h2>
-                <p>
-                  Donec id elit non mi porta gravida at eget metus. Fusce
-                  dapibus, tellus ac cursus commodo, tortor mauris condimentum
-                  nibh, ut fermentum massa justo sit amet risus. Etiam porta sem
-                  malesuada magna mollis euismod. Donec sed odio dui.
-                </p>
-                <p>
-                  <button className="btn btn-secondary">
-                    View details &raquo;
-                  </button>
-                </p>
-              </div>
-              <div className="col-md-4">
-                <h2>Heading</h2>
-                <p>
-                  Donec sed odio dui. Cras justo odio, dapibus ac facilisis in,
-                  egestas eget quam. Vestibulum id ligula porta felis euismod
-                  semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris
-                  condimentum nibh, ut fermentum massa justo sit amet risus.
-                </p>
-                <p>
-                  <button className="btn btn-secondary">
-                    View details &raquo;
-                  </button>
-                </p>
-              </div>
-            </div>
-
-            <hr />
-          </div>
+          <Switch>
+            <Route
+              path="/Login"
+              exact
+              render={() => {
+                return <Login updateUserLogin={this.updateUserLogin} />;
+              }}
+            />
+            <Route path="/Register" exact component={Register} />
+            <Route path="/Friends" exact component={Friends} />
+            <Route path="/FriendsForm/" exact component={FriendsForm} />
+            <Route path="/FriendsForm/:id(\d+)" exact component={FriendsForm} />
+            <Route path="/Blogs" exact component={Blogs} />
+            <Route path="/Tech" exact component={Tech} />
+            <Route path="/Jobs" exact component={Jobs} />
+            <Route path="/Events" exact component={Events} />
+            <Route
+              path="/"
+              exact
+              render={() => {
+                return <Home user={this.state.user} />;
+              }}
+            />
+          </Switch>
         </main>
 
-        <footer className="container">
-          <p>&copy; Sabio 2019-2020</p>
-        </footer>
-      </React.Fragment>
+        <Footer />
+      </BrowserRouter>
     );
   }
 }
